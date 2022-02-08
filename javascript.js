@@ -1,54 +1,104 @@
 const url = 'https://hexschool.github.io/js-filter-data/data.json';
 const category = document.querySelector("#category");
 const searchField = document.querySelector("#search-field");
-const search = document.querySelector("#search");
 const select = document.querySelector("#js-select");
 const mobileSelect = document.querySelector("#js-moblie-select");
 
-let obj = {};
 let data = [];
 let tempData = [];
-let currentCategory = '蔬果';
+let noResult = false;
+let currentCategory = '';
+let currentPage = 1
+let totalPage = 0
 
 // 獲取資料
 axios.get(url).then(function (res) {
     if (res.status == "200") {
         data = res.data
-        console.log(data)
+        // console.log(data)
     }
 });
 
 // 渲染畫面
 function renderData(value) {
     str = "";
-    value.forEach(function (item) {
-        if (searchField.textContent === '') {
+    // console.log(tempData);
+    if (tempData.length === 0) {
+        str += `
+            <tr>
+                <td colspan="7" class="text-center p-3">請輸入並搜尋想比價的作物名稱^＿^</td>
+            </tr>`;
+        
+    } else if (noResult == true) {
+        str += `
+            <tr>
+                <td colspan="7" class="text-center p-3">查詢不到當日的交易資訊QQ</td>
+            </tr>`;
+    } else {
+        value.forEach(function (item) {
             str += `
-                <td colspan="7" class="text-center p-3">請輸入並搜尋想比價的作物名稱^＿^</td>`;
-        } else {
-            str += `
-                <td colspan="7" class="text-center p-3">${item['作物名稱']}</td>
-                <td colspan="7" class="text-center p-3">${item['市場名稱']}</td>
-                <td colspan="7" class="text-center p-3">${item['上價']}</td>
-                <td colspan="7" class="text-center p-3">${item['中價']}</td>
-                <td colspan="7" class="text-center p-3">${item['下價']}</td>
-                <td colspan="7" class="text-center p-3">${item['平均價']}</td>
-                <td colspan="7" class="text-center p-3">${item['交易量']}</td>`;
-        }
-    })
+                <tr class="text-center">
+                    <td>${item['作物名稱']}</td>
+                    <td>${item['市場名稱']}</td>
+                    <td>${item['上價']}</td>
+                    <td>${item['中價']}</td>
+                    <td>${item['下價']}</td>
+                    <td>${item['平均價']}</td>
+                    <td>${item['交易量']}</td>
+                </tr>`;
+        })
+    }
     const show = document.querySelector(".showList");
     show.innerHTML = str;
+    noResult = false;
 }
 
 // 切換標籤
 category.addEventListener("click", function (e) {
-    const btn = document.querySelectorAll(".tab button");
-})
+    currentCategory = e.target.getAttribute("data-type");
+    console.log(currentCategory);
+    filtering();
+});
+
+// 過濾
+function filtering() {
+    if (currentCategory === 'N04') {
+        tempData = data.filter(function (item) {
+            return item['種類代碼'] === 'N04';
+        });
+    } else if (currentCategory === 'N05') {
+        tempData = data.filter(function (item) {
+            return item['種類代碼'] === 'N05';
+        });
+    } else if (currentCategory === 'N06') {
+        tempData = data.filter(function (item) {
+            return item['種類代碼'] === 'N06';
+        });
+    }
+    renderData(tempData);
+}
 
 // 搜尋
-search.addEventListener("click", function (e) {
-
-})
+function search() {
+    word = searchField.value
+    let searchData = [];
+    // console.log(word);
+    if (tempData.length === 0) {
+        alert('請先選擇農產品種類')
+    } else {
+        if (word === '') {
+            alert('請輸入作物名稱');
+        } else {
+            searchData = tempData.filter(function (item) {
+                return item['作物名稱'].includes(word);
+            })
+            if (searchData.length === 0) {
+                noResult = true;
+            }
+            renderData(searchData);
+        }
+    }
+}
 
 // 排序
 select.addEventListener("click", function (e) {
@@ -61,9 +111,6 @@ mobileSelect.addEventListener("click", function (e) {
 })
 
 // 初始化
-function init() {
-    renderData(tempData)
+window.onload = function () {
+    renderData(tempData);
 }
-
-
-
