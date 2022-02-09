@@ -165,3 +165,46 @@ body {
   top: 9px;
   right: -15px;
 }
+
+.table-page {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  visibility: hidden;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  margin-top: 10px;
+}
+
+.table-page.visible {
+  visibility: visible;
+}
+
+.table-page li {
+  background: #FFFFFF;
+  border: 1px solid #899E39;
+  padding: 2px 8px;
+  list-style-type: none;
+}
+
+.table-page li:first-child {
+  border-radius: 5px 0 0 5px;
+}
+
+.table-page li:last-child {
+  border-radius: 0 5px 5px 0;
+}
+
+.table-page li.page-active {
+  background: #899E39;
+}
+
+.table-page li.page-not-active {
+  color: lightgray;
+}
+
+.table-page li:hover:not(.page-not-active) {
+  cursor: pointer;
+  background: rgba(143, 158, 57, 0.3);
+}

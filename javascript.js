@@ -2,7 +2,9 @@ const url = "https://hexschool.github.io/js-filter-data/data.json";
 const category = document.querySelector("#category");
 const searchField = document.querySelector("#search-field");
 const select = document.querySelector("#js-select");
+const mobileSelect = document.querySelector("#js-moblie-select");
 const advancedSelect = document.querySelector(".js-sort-advanced");
+const pagenation = document.querySelector(".table-page")
 
 let data = [];
 let currentCategory = "";
@@ -23,7 +25,9 @@ axios.get(url).then(function (res) {
 
 // 渲染畫面
 function renderData(value) {
-  str = "";
+  let str = "";
+  let totalPage = Math.ceil(value.length / 10);
+  console.log(value, totalPage);
   // console.log(tempData);
   if (tempData.length === 0) {
     str += `
@@ -79,6 +83,7 @@ function filtering() {
   }
   renderData(tempData);
   select.value = "排序";
+  mobileSelect.value = "排序";
 }
 
 // 搜尋
@@ -99,6 +104,7 @@ function searchring() {
       }
       renderData(searchData);
       select.value = "排序";
+      mobileSelect.value = "排序";
     }
   }
 }
@@ -109,10 +115,15 @@ select.addEventListener("change", function (e) {
   sorting(value);
 });
 
+mobileSelect.addEventListener("change", function (e) {
+  let value = e.target.value;
+  sorting(value);
+});
+
 // 進階排序選擇
 advancedSelect.addEventListener("click", function (e) {
   let value = e.target.textContent.trim(); // 點到標籤，沒有點到 fas icon，取 div textContent;
-//   console.log(value);
+  //   console.log(value);
   if (value !== "作物名稱" && value !== "市場名稱") {
     let caret = e.target.getAttribute("data-sort");
     if (value === "") {
@@ -125,6 +136,7 @@ advancedSelect.addEventListener("click", function (e) {
     }
     sorting(value);
     select.value = value;
+    mobileSelect.value = value;
   }
 });
 
@@ -154,7 +166,7 @@ function sortingMethod(data, cri) {
     sortData.reverse();
   }
   renderData(sortData);
-  reverse = false; // 每次渲染完，反向重置
+  reverse = false; // 每次渲染完，重置反向
 }
 
 // 初始化
