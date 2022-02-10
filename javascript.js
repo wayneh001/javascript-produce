@@ -6,15 +6,16 @@ const mobileSelect = document.querySelector("#js-moblie-select");
 const advancedSelect = document.querySelector(".js-sort-advanced");
 const pagenation = document.querySelector(".table-page")
 
-let data = [];
-let currentCategory = "";
-let tempData = [];
-let noResult = false;
-let searchData = [];
-let reverse = false;
-let currentPage = 1;
-let perPage = 30;
-let totalPage = 0;
+let data = []; // 儲存 axios 回傳資料
+let currentCategory = ""; // 儲存當前種類標籤
+let tempData = []; // 畫面渲染資料
+let noResult = false; // 搜尋結果判定
+let searchData = []; // 儲存搜尋結果
+let reverse = false; // 排序反轉判定
+let currentPage = 1; // 儲存當前頁面
+let currentPageGroup = 1; // 儲存當前渲染頁面組 ( 每 10 頁做渲染 )
+let perPage = 30; // 儲存每頁顯示資料數 ( 未使用 )
+let totalPage = 0; // 儲存總頁數
 
 // 獲取資料
 axios.get(url).then(function (res) {
@@ -27,7 +28,7 @@ axios.get(url).then(function (res) {
 // 渲染畫面
 function renderData(value) {
   let str = '';
-  // console.log(tempData);
+
   if (tempData.length == 0) {
     str += `
       <tr>
@@ -39,6 +40,7 @@ function renderData(value) {
                 <td colspan="7" class="text-center p-3">查詢不到當日的交易資訊QQ</td>
             </tr>`;
   } else {
+    noResult = false;
     let currentPageData = value.slice((currentPage - 1) * perPage, currentPage * perPage); // 頁面呈現，始 ( 含 ) 於 ( ( 當前頁面 - 1 ) * 每頁頁面 ) 的編號 ( 如第一頁始於第 [0] 筆資料 )，終 ( 不含 ) 於當前頁面 * 每頁頁面的編號，( 如第一頁終於第 [30] 筆資料 )
     currentPageData.forEach(function (item) {
       str += `
@@ -55,73 +57,16 @@ function renderData(value) {
   }
   const show = document.querySelector(".showList");
   show.innerHTML = str;
-  noResult = false;
-}
-
-// 渲染頁碼
-function renderPage(value) {
-  let str = '';
-  let page = [];
-  totalPage = Math.ceil(value.length / perPage);
-  // console.log(value.length, totalPage);
-  for (i = 1; i <= totalPage; i++) {
-    page.push(`<li class="page" data-page=${i} onclick="pageChange(${i})">${i}</li>`);
-  }
-  page.toString();
-  console.log(page);
-  // page.replaceAll(',','');
-  str += `
-    <li class="page-prev" data-page=0 onclick="pageChange(currentPage - 1)"><i class="fas fa-angle-left"></i></li>
-    ${page}
-    <li class="page-next" data-page=0 onclick="pageChange(currentPage + 1)"><i class="fas fa-angle-right"></i></li>
-  `;
-  pagenation.innerHTML = str;
-  pagenation.classList.add("visible");
-  pageStyle();
-}
-
-// 頁碼樣式變化
-function pageStyle() {
-  const pages = pagenation.querySelectorAll('.page');
-  pages[0].classList.add("page-active");
-
-  pagenation.querySelector('.page-prev').classList.remove('page-not-active');
-  pagenation.querySelector('.page-next').classList.remove('page-not-active');
-  if (currentPage == 1) {
-    pagenation.querySelector('.page-prev').classList.add('page-not-active');
-    console.log('yes');
-  } else if (currentPage == totalPage) {
-    pagenation.querySelector('.page-next').classList.add('page-not-active');
-  }
-
-  pages.forEach(function (item) {
-    item.classList.remove("page-active");
-    if (currentPage == item.getAttribute("data-page")) {
-      item.classList.add("page-active");
-    }
-  })
-}
-
-// 跳轉頁碼
-function pageChange(value) {
-  if (value == 0) {
-    currentPage = 1;
-  } else if (value >= totalPage) {
-    currentPage = totalPage;
-  } else {
-    currentPage = value;
-  }
-  // console.log(currentPage);
-  pageStyle();
-  renderData(tempData);
 }
 
 // 切換標籤
 category.addEventListener("click", function (e) {
   currentCategory = e.target.getAttribute("data-type");
-  //   console.log(currentCategory);
-  filtering();
-  searchField.value = "";
+  // console.log(currentCategory);
+  if (currentCategory != null) {
+    filtering();
+    searchField.value = "";
+  }
 });
 
 // 過濾
@@ -139,6 +84,7 @@ function filtering() {
       return item["種類代碼"] == "N06";
     });
   }
+  currentPage = 1;
   renderData(tempData);
   renderPage(tempData);
   select.value = "排序";
@@ -160,8 +106,9 @@ function searchring() {
       });
       if (searchData.length == 0) {
         noResult = true;
+      } else {
+        tempData = searchData;
       }
-      tempData = searchData;
       renderData(tempData);
       renderPage(tempData);
       select.value = "排序";
@@ -229,6 +176,81 @@ function sortingMethod(data, cri) {
   currentPage = 1;
   renderData(tempData);
   reverse = false; // 每次渲染完，重置反向
+}
+
+// 渲染頁碼
+function renderPage(value) {
+  let str = '';
+  let page = [];
+  totalPage = Math.ceil(value.length / perPage);
+  currentPageGroup = Math.ceil(currentPage / 10);
+  if (noResult == true) {
+    str = '';
+  } else {
+    if (currentPageGroup == Math.ceil(totalPage / 10)) {
+      for (i = currentPageGroup * 10 - 9; i <= totalPage; i++) {
+        page += `<li class="page" data-page=${i} onclick="pageChange(${i})">${i}</li>`;
+      }
+    } else {
+      for (i = currentPageGroup * 10 - 9; i <= currentPageGroup * 10; i++) {
+        page += `<li class="page" data-page=${i} onclick="pageChange(${i})">${i}</li>`;
+      }
+    }
+    str += `
+      <li class="page-prev-ten" data-page=0 onclick="pageChange(currentPage - 10)"><i class="fas fa-angle-double-left"></i></li>
+      <li class="page-prev" data-page=0 onclick="pageChange(currentPage - 1)"><i class="fas fa-angle-left"></i></li>
+      ${page}
+      <li class="page-next" data-page=0 onclick="pageChange(currentPage + 1)"><i class="fas fa-angle-right"></i></li>
+      <li class="page-next-ten" data-page=0 onclick="pageChange(currentPage + 10)"><i class="fas fa-angle-double-right"></i></li>
+    `;
+  }
+  pagenation.innerHTML = str;
+  pagenation.classList.add("visible");
+  noResult = false;
+  if (str != '') {
+    pageStyle();
+  }
+}
+
+// 頁碼樣式變化
+function pageStyle() {
+  const pages = pagenation.querySelectorAll('.page');
+  pages[0].classList.add("page-active");
+  pagenation.querySelector('.page-prev').classList.remove('page-not-active');
+  pagenation.querySelector('.page-next').classList.remove('page-not-active');
+  pagenation.querySelector('.page-prev-ten').classList.remove('page-not-active');
+  pagenation.querySelector('.page-next-ten').classList.remove('page-not-active');
+  if (currentPage == 1) {
+    pagenation.querySelector('.page-prev').classList.add('page-not-active');
+  } else if (currentPage == totalPage) {
+    pagenation.querySelector('.page-next').classList.add('page-not-active');
+  }
+  if (currentPageGroup == 1) {
+    pagenation.querySelector('.page-prev-ten').classList.add('page-not-active');
+  }
+  if (currentPageGroup == Math.ceil(totalPage / 10)) {
+    pagenation.querySelector('.page-next-ten').classList.add('page-not-active');
+  }
+  pages.forEach(function (item) {
+    item.classList.remove("page-active");
+    if (currentPage == item.getAttribute("data-page")) {
+      item.classList.add("page-active");
+    }
+  })
+}
+
+// 跳轉頁碼
+function pageChange(value) {
+  if (value == 0) {
+    currentPage = 1;
+  } else if (value >= totalPage) {
+    currentPage = totalPage;
+  } else {
+    currentPage = value;
+  }
+  renderPage(tempData);
+  pageStyle();
+  renderData(tempData);
 }
 
 // 初始化
