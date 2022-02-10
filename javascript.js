@@ -65,11 +65,14 @@ function renderPage(value) {
   totalPage = Math.ceil(value.length / perPage);
   // console.log(value.length, totalPage);
   for (i = 1; i <= totalPage; i++) {
-    // page += `<li class="page" data-page=${i} onclick="pageChange(${i})">${i}</li>`;
+    page.push(`<li class="page" data-page=${i} onclick="pageChange(${i})">${i}</li>`);
   }
+  page.toString();
+  console.log(page);
+  // page.replaceAll(',','');
   str += `
     <li class="page-prev" data-page=0 onclick="pageChange(currentPage - 1)"><i class="fas fa-angle-left"></i></li>
-    ${page.toString()}
+    ${page}
     <li class="page-next" data-page=0 onclick="pageChange(currentPage + 1)"><i class="fas fa-angle-right"></i></li>
   `;
   pagenation.innerHTML = str;
