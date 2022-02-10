@@ -28,7 +28,7 @@ axios.get(url).then(function (res) {
 function renderData(value) {
   let str = '';
   // console.log(tempData);
-  if (tempData.length === 0) {
+  if (tempData.length == 0) {
     str += `
       <tr>
           <td colspan="7" class="text-center p-3">請輸入並搜尋想比價的作物名稱^＿^</td>
@@ -61,64 +61,57 @@ function renderData(value) {
 // 渲染頁碼
 function renderPage(value) {
   let str = '';
-  let page = '';
+  let page = [];
   totalPage = Math.ceil(value.length / perPage);
   // console.log(value.length, totalPage);
   for (i = 1; i <= totalPage; i++) {
-    page += `<li class="page" data-page=${i}>${i}</li>`;
+    // page += `<li class="page" data-page=${i} onclick="pageChange(${i})">${i}</li>`;
   }
   str += `
-    <li class="page-prev-ten" data-page=0><i class="fas fa-angle-double-left"></i></li>
-    <li class="page-prev" data-page=0><i class="fas fa-angle-left"></i></li>
-    ${page}
-    <li class="page-next" data-page=0><i class="fas fa-angle-right"></i></li>
-    <li class="page-next-ten" data-page=0><i class="fas fa-angle-double-right"></i></li>
+    <li class="page-prev" data-page=0 onclick="pageChange(currentPage - 1)"><i class="fas fa-angle-left"></i></li>
+    ${page.toString()}
+    <li class="page-next" data-page=0 onclick="pageChange(currentPage + 1)"><i class="fas fa-angle-right"></i></li>
   `;
   pagenation.innerHTML = str;
   pagenation.classList.add("visible");
-  pagenation.querySelector('.page').classList.add("page-active");
-  if (currentPage === 1) {
-    pagenation.querySelector('.page-prev-ten').classList.add('page-not-active');
-    pagenation.querySelector('.page-prev').classList.add('page-not-active');
-    console.log('1');
-  } else if (currentPage <= 10) {
-    pagenation.querySelector('.page-prev-ten').classList.add('page-not-active');
-    console.log(currentPage, '2');
-  }
-
-  if (currentPage === totalPage) {
-    pagenation.querySelector('.page-next').classList.add('page-not-active');
-    pagenation.querySelector('.page-next-ten').classList.add('page-not-active');
-    console.log('3');
-  } else if (totalPage - currentPage <= 10) {
-    pagenation.querySelector('.page-next-ten').classList.add('page-not-active');
-    console.log('4');
-  }
-
+  pageStyle();
 }
 
-// 跳轉頁碼
-pagenation.addEventListener("click", function (e) {
-  if (e.target.getAttribute("class") === 'page-prev' && currentPage !== 1) {
-    currentPage - 1;
-  } else if (e.target.getAttribute("class") === 'page-prev-ten' && currentPage !== totalPage) {
-    currentPage - 10;
-  } else if (e.target.getAttribute("class") === 'page-next' && currentPage !== totalPage) {
-    currentPage + 1;
-  } else if (e.target.getAttribute("class") === 'page-next-ten' && currentPage !== totalPage) {
-    currentPage + 10;
-  } else {
-    currentPage = e.target.getAttribute("data-page");
-  }
+// 頁碼樣式變化
+function pageStyle() {
   const pages = pagenation.querySelectorAll('.page');
+  pages[0].classList.add("page-active");
+
+  pagenation.querySelector('.page-prev').classList.remove('page-not-active');
+  pagenation.querySelector('.page-next').classList.remove('page-not-active');
+  if (currentPage == 1) {
+    pagenation.querySelector('.page-prev').classList.add('page-not-active');
+    console.log('yes');
+  } else if (currentPage == totalPage) {
+    pagenation.querySelector('.page-next').classList.add('page-not-active');
+  }
+
   pages.forEach(function (item) {
     item.classList.remove("page-active");
     if (currentPage == item.getAttribute("data-page")) {
       item.classList.add("page-active");
     }
   })
+}
+
+// 跳轉頁碼
+function pageChange(value) {
+  if (value == 0) {
+    currentPage = 1;
+  } else if (value >= totalPage) {
+    currentPage = totalPage;
+  } else {
+    currentPage = value;
+  }
+  // console.log(currentPage);
+  pageStyle();
   renderData(tempData);
-})
+}
 
 // 切換標籤
 category.addEventListener("click", function (e) {
@@ -130,17 +123,17 @@ category.addEventListener("click", function (e) {
 
 // 過濾
 function filtering() {
-  if (currentCategory === "N04") {
+  if (currentCategory == "N04") {
     tempData = data.filter(function (item) {
-      return item["種類代碼"] === "N04";
+      return item["種類代碼"] == "N04";
     });
-  } else if (currentCategory === "N05") {
+  } else if (currentCategory == "N05") {
     tempData = data.filter(function (item) {
-      return item["種類代碼"] === "N05";
+      return item["種類代碼"] == "N05";
     });
-  } else if (currentCategory === "N06") {
+  } else if (currentCategory == "N06") {
     tempData = data.filter(function (item) {
-      return item["種類代碼"] === "N06";
+      return item["種類代碼"] == "N06";
     });
   }
   renderData(tempData);
@@ -153,16 +146,16 @@ function filtering() {
 function searchring() {
   word = searchField.value;
   // console.log(word);
-  if (tempData.length === 0) {
+  if (tempData.length == 0) {
     alert("請先選擇農產品種類");
   } else {
-    if (word === "") {
+    if (word == "") {
       alert("請輸入作物名稱");
     } else {
       searchData = tempData.filter(function (item) {
         return item["作物名稱"].includes(word);
       });
-      if (searchData.length === 0) {
+      if (searchData.length == 0) {
         noResult = true;
       }
       tempData = searchData;
@@ -191,12 +184,12 @@ advancedSelect.addEventListener("click", function (e) {
   //   console.log(value);
   if (value !== "作物名稱" && value !== "市場名稱") {
     let caret = e.target.getAttribute("data-sort");
-    if (value === "") {
+    if (value == "") {
       value = e.target.getAttribute("data-price"); // 點到 fas icon，取 i data-price 值;
     }
-    if (caret === "down") {
+    if (caret == "down") {
       reverse = true;
-    } else if (caret === "up") {
+    } else if (caret == "up") {
       reverse = false;
     }
     sorting(value);
@@ -207,10 +200,10 @@ advancedSelect.addEventListener("click", function (e) {
 
 // 排序事件
 function sorting(cri) {
-  if (tempData.length === 0) {
+  if (tempData.length == 0) {
     alert("請先選擇農產品種類");
   } else {
-    if (searchData.length === 0) {
+    if (searchData.length == 0) {
       sortingMethod(tempData, cri);
     } else {
       tempData = searchData;
@@ -230,6 +223,7 @@ function sortingMethod(data, cri) {
   if (reverse == true) {
     tempData.reverse();
   }
+  currentPage = 1;
   renderData(tempData);
   reverse = false; // 每次渲染完，重置反向
 }
