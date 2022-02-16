@@ -1,6 +1,7 @@
 const url = "https://hexschool.github.io/js-filter-data/data.json";
 const category = document.querySelector("#category");
 const searchField = document.querySelector("#search-field");
+const display = document.querySelector("#js-crop-name")
 const select = document.querySelector("#js-select");
 const mobileSelect = document.querySelector("#js-moblie-select");
 const advancedSelect = document.querySelector(".js-sort-advanced");
@@ -61,12 +62,18 @@ function renderData(value) {
 
 // 切換標籤
 category.addEventListener("click", function (e) {
-  currentCategory = e.target.getAttribute("data-type");
-  // console.log(currentCategory);
-  if (currentCategory != null) {
-    filtering();
-    searchField.value = "";
-  }
+  const buttons = category.querySelectorAll('button')
+  buttons.forEach(function (item) {
+    item.classList.remove("active");
+    currentCategory = e.target.getAttribute("data-type");
+    // console.log(currentCategory);
+    if (currentCategory != null) {
+      e.target.classList.add("active");
+      searchData = [];
+      filtering();
+      searchField.value = "";
+    }
+  });
 });
 
 // 過濾
@@ -104,6 +111,7 @@ function searchring() {
       searchData = tempData.filter(function (item) {
         return item["作物名稱"].includes(word);
       });
+      display.innerHTML = `查看「${word}」的比價結果`
       if (searchData.length == 0) {
         noResult = true;
       } else {
@@ -222,15 +230,16 @@ function pageStyle() {
   pagenation.querySelector('.page-next-ten').classList.remove('page-not-active');
   if (currentPage == 1) {
     pagenation.querySelector('.page-prev').classList.add('page-not-active');
+    pagenation.querySelector('.page-next').classList.add('page-not-active');
   } else if (currentPage == totalPage) {
     pagenation.querySelector('.page-next').classList.add('page-not-active');
   }
   if (currentPageGroup == 1) {
     pagenation.querySelector('.page-prev-ten').classList.add('page-not-active');
   }
-  if (currentPageGroup == Math.ceil(totalPage / 10)) {
-    pagenation.querySelector('.page-next-ten').classList.add('page-not-active');
-  }
+  // if (currentPageGroup == Math.ceil(totalPage / 10)) {
+  //   pagenation.querySelector('.page-next-ten').classList.add('page-not-active');
+  // }
   pages.forEach(function (item) {
     item.classList.remove("page-active");
     if (currentPage == item.getAttribute("data-page")) {
@@ -241,7 +250,7 @@ function pageStyle() {
 
 // 跳轉頁碼
 function pageChange(value) {
-  if (value == 0) {
+  if (value <= 0) {
     currentPage = 1;
   } else if (value >= totalPage) {
     currentPage = totalPage;

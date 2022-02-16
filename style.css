@@ -63,6 +63,11 @@ body {
 .btn-type:active {
   background: #f8d45a;
 }
+
+.active {
+  background: #f8d45a;
+}
+
 @media (max-width: 767px) {
   .btn-type {
     padding: 0.5rem 2.25rem;
