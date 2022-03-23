@@ -67,6 +67,7 @@ category.addEventListener("click", function (e) {
     item.classList.remove("active");
     currentCategory = e.target.getAttribute("data-type");
     // console.log(currentCategory);
+    display.innerHTML = "";
     if (currentCategory != null) {
       e.target.classList.add("active");
       searchData = [];
@@ -108,6 +109,7 @@ function searchring() {
     if (word == "") {
       alert("請輸入作物名稱");
     } else {
+      currentPage = 1;
       searchData = tempData.filter(function (item) {
         return item["作物名稱"].includes(word);
       });
@@ -162,9 +164,9 @@ function sorting(cri) {
     alert("請先選擇農產品種類");
   } else {
     if (searchData.length == 0) {
+      tempData = searchData;
       sortingMethod(tempData, cri);
     } else {
-      tempData = searchData;
       sortingMethod(tempData, cri);
     }
   }
@@ -228,9 +230,11 @@ function pageStyle() {
   pagenation.querySelector('.page-next').classList.remove('page-not-active');
   pagenation.querySelector('.page-prev-ten').classList.remove('page-not-active');
   pagenation.querySelector('.page-next-ten').classList.remove('page-not-active');
-  if (currentPage == 1) {
+  if (currentPage == 1 && totalPage == 1) {
     pagenation.querySelector('.page-prev').classList.add('page-not-active');
     pagenation.querySelector('.page-next').classList.add('page-not-active');
+    pagenation.querySelector('.page-prev-ten').classList.add('page-not-active');
+    pagenation.querySelector('.page-next-ten').classList.add('page-not-active');
   } else if (currentPage == totalPage) {
     pagenation.querySelector('.page-next').classList.add('page-not-active');
   }
